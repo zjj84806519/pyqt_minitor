@@ -11,7 +11,6 @@ class SmallScreen(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.setupUi()
-        # self.openCamera()
 
     def setupUi(self):
         self.resize(305, 178)
@@ -58,9 +57,6 @@ class SmallScreen(QWidget):
         # print(timedisplay)
         self.time.setText(timedisplay)
 
-    # def openCamera(self):
-    #     pass
-
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.double_clicked_item.emit(self.camera.text())
 
@@ -93,16 +89,6 @@ class BigScreen(SmallScreen):
 
     def showTime(self):
         super().showTime()
-
-    def openCamera(self):   # 有bug调用不了
-        cap = cv2.VideoCapture(0)
-        while cap.isOpened():
-            ret, frame = cap.read()
-            img = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0], QtGui.QImage.Format_BGR888)  # 设置label高度和宽度
-            # self.text.setFixedSize(frame.shape[1], frame.shape[0])
-            self.text.setPixmap(QtGui.QPixmap.fromImage(img))
-            self.text.setScaledContents(True)  # 自适应大小
-            QtWidgets.QApplication.processEvents()
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.double_clicked_item.emit(self.camera.text())
