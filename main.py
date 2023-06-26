@@ -1,10 +1,53 @@
 import sys
 
+import cv2
 from PyQt5.Qt import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 
 from Camera import SmallScreen, BigScreen
+
+
+class ListenWorkThread1(QThread):
+    def __init__(self, parent=None):
+        super(ListenWorkThread1, self).__init__()
+        self.parent = parent
+        self.working = True
+
+    def __del__(self):
+        self.working = False
+
+    def run(self):
+        self.cap = cv2.VideoCapture('rtsp://admin:123456@192.168.50.12:8554/live')
+        while self.cap.isOpened():
+            ret, frame = self.cap.read()
+            img = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0], QtGui.QImage.Format_BGR888)
+            # self.parent.camera_1.text.setFixedSize(frame.shape[1], frame.shape[0])
+            self.parent.camera_1.text.setPixmap(QtGui.QPixmap.fromImage(img))
+            # self.parent.camera_1.text.setFixedSize(307, 194)
+            self.parent.camera_1.text.setScaledContents(True)  # 自适应大小
+            QtWidgets.QApplication.processEvents()
+
+
+class ListenWorkThread2(QThread):
+    def __init__(self, parent=None):
+        super(ListenWorkThread2, self).__init__()
+        self.parent = parent
+        self.working = True
+
+    def __del__(self):
+        self.working = False
+
+    def run(self):
+        self.cap = cv2.VideoCapture('rtsp://admin:123456@192.168.50.9:8554/live')
+        while self.cap.isOpened():
+            ret, frame = self.cap.read()
+            img = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0], QtGui.QImage.Format_BGR888)
+            # self.parent.camera_1.text.setFixedSize(frame.shape[1], frame.shape[0])
+            self.parent.camera_2.text.setPixmap(QtGui.QPixmap.fromImage(img))
+            # self.parent.camera_1.text.setFixedSize(307, 194)
+            self.parent.camera_2.text.setScaledContents(True)  # 自适应大小
+            QtWidgets.QApplication.processEvents()
 
 
 class MyWindow(QWidget):
@@ -471,6 +514,9 @@ class MyWindow(QWidget):
 
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
+        self.listen_thread1 = ListenWorkThread1(self)
+
+        self.listen_thread2 = ListenWorkThread2(self)
         self.Title_Button()
 
     def retranslateUi(self):
@@ -567,7 +613,10 @@ class MyWindow(QWidget):
     def videoDoubleClicked(self, msg):
         # print(msg)
         self.video.setCameraName(msg)
-        self.home_page.setCurrentIndex(1)
+        # self.home_page.setCurrentIndex(1)
+        print(msg)
+        self.listen_thread1.start()
+        self.listen_thread2.start()
         # self.maximize()
 
     # def maximize(self):
